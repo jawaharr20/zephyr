@@ -1,0 +1,649 @@
+// hi this is the zephyr blinky code for 5000ms
+
+This to find the stm32 location:
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ find ~/STM32CubeIDE/ -name STM32_Programmer_CLI
+jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ find / -name "stm32cubeide" 2>/dev/null
+
+^C
+jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ cd
+jawahar@jawahar:~$ find / -name "stm32cubeide" 2>/dev/null
+/opt/st/stm32cubeide_1.11.0/stm32cubeide
+jawahar@jawahar:~$ find /opt/st/stm32cubeide_1.11.0/ -name STM32_Programmer_CLI
+/opt/st/stm32cubeide_1.11.0/plugins/com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.linux64_2.0.500.202209151145/tools/bin/STM32_Programmer_CLI
+jawahar@jawahar:~$ nano ~/.bashrc
+jawahar@jawahar:~$ source ~/.bashrc
+jawahar@jawahar:~$ STM32_Programmer_CLI --version
+      -------------------------------------------------------------------
+                        STM32CubeProgrammer v2.12.0                  
+      -------------------------------------------------------------------
+
+STM32CubeProgrammer version: 2.12.0 
+
+jawahar@jawahar:~$ 
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+For blink code i have create own project doing 5000ms on zephyr
+
+my_blinky_app/
+├── src/
+│   └── main.c ✅
+├── CMakeLists.txt
+└── prj.conf
+
+
+use this to build files
+-------------------------
+mkdir ~/my_zephyr_apps/stop_app
+cd ~/my_zephyr_apps/stop_app
+touch prj.conf CMakeLists.txt src/main.c
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++		
+
+ 😎️src/main.c:
+ 
+Paste your edited Zephyr code here:
+
+#include <zephyr/kernel.h>
+#include <zephyr/drivers/gpio.h>
+
+#define LED_NODE DT_ALIAS(led0)
+
+static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED_NODE, gpios);
+
+void main(void) {
+    gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
+
+    while (1) {
+        gpio_pin_toggle_dt(&led);
+        k_msleep(50000);
+    }
+}
+
+
+😁️ CMakeLists.txt
+
+cmake_minimum_required(VERSION 3.20.0)
+find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
+project(my_blinky_app)
+
+
+➡️prj.conf
+
+    CONFIG_GPIO=y
+
+
+
+➡️  west build -b nucleo_f446re . -p
+
+
+😀️    west flash
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++		
+
+-b specifies your board
+
+-p forces a pristine (clean) build
+
+
+✅ Folder Structure Summary
+
+
+
+zephyrproject/
+├── zephyr/               → Zephyr source
+├── modules/              → Zephyr modules
+├── tools/                → Build tools
+└── myapps/               → 🔥 Your apps
+    └── my_blinky_app/
+        ├── CMakeLists.txt
+        ├── prj.conf
+        └── src/
+            └── main.c
+
+
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++		
+
+😎️ errors i faced and overcomed in the terminal 
+
+
+
+
+
+
+
+jawahar@jawahar:~$ source ~/zephyr-venv/bin/activate
+bash: /home/jawahar/zephyr-venv/bin/activate: No such file or directory
+jawahar@jawahar:~$ source ~/zephyr-env/bin/activate
+((zephyr-env) ) jawahar@jawahar:~$ west --version
+West version: v1.4.0
+((zephyr-env) ) jawahar@jawahar:~$ echo $ZEPHYR_BASE
+
+((zephyr-env) ) jawahar@jawahar:~$ source ~/zephyrproject/zephyr/zephyr-env.sh
+((zephyr-env) ) jawahar@jawahar:~$ echo $ZEPHYR_BASE
+/home/jawahar/zephyrproject/zephyr
+((zephyr-env) ) jawahar@jawahar:~$ west boards | grep f446
+weact_stm32f446_core
+nucleo_f446ze
+nucleo_f446re
+((zephyr-env) ) jawahar@jawahar:~$ cd ~/zephyrproject/zephyr/samples/basic/blinky
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ west build -b nucleo_f446re . -p
+-- west build: generating a build system
+Loading Zephyr default modules (Zephyr base).
+-- Application: /home/jawahar/zephyrproject/zephyr/samples/basic/blinky
+-- CMake version: 3.20.0
+-- Found Python3: /home/jawahar/zephyr-env/bin/python3.12 (found suitable version "3.12.11", minimum required is "3.12.1") found components: Interpreter 
+-- Cache files will be written to: /home/jawahar/.cache/zephyr
+-- Zephyr version: 4.2.00-rc1 (/home/jawahar/zephyrproject/zephyr)
+-- Found west (found suitable version "1.4.0", minimum required is "0.14.0")
+-- Board: nucleo_f446re, qualifiers: stm32f446xx
+-- ZEPHYR_TOOLCHAIN_VARIANT not set, trying to locate Zephyr SDK
+-- Found host-tools: zephyr 0.16.5 (/opt/zephyr-sdk)
+-- Found toolchain: zephyr 0.16.5 (/opt/zephyr-sdk)
+-- Found Dtc: /opt/zephyr-sdk/sysroots/x86_64-pokysdk-linux/usr/bin/dtc (found suitable version "1.6.0", minimum required is "1.4.6") 
+-- Found BOARD.dts: /home/jawahar/zephyrproject/zephyr/boards/st/nucleo_f446re/nucleo_f446re.dts
+-- Generated zephyr.dts: /home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build/zephyr/zephyr.dts
+-- Generated pickled edt: /home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build/zephyr/edt.pickle
+-- Generated devicetree_generated.h: /home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build/zephyr/include/generated/zephyr/devicetree_generated.h
+Parsing /home/jawahar/zephyrproject/zephyr/Kconfig
+Loaded configuration '/home/jawahar/zephyrproject/zephyr/boards/st/nucleo_f446re/nucleo_f446re_defconfig'
+Merged configuration '/home/jawahar/zephyrproject/zephyr/samples/basic/blinky/prj.conf'
+Configuration saved to '/home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build/zephyr/.config'
+Kconfig header saved to '/home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build/zephyr/include/generated/zephyr/autoconf.h'
+-- Found GnuLd: /opt/zephyr-sdk/arm-zephyr-eabi/arm-zephyr-eabi/bin/ld.bfd (found version "2.38") 
+-- The C compiler identification is GNU 12.2.0
+-- The CXX compiler identification is GNU 12.2.0
+-- The ASM compiler identification is GNU
+-- Found assembler: /opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc
+-- Using ccache: /usr/bin/ccache
+-- Found gen_kobject_list: /home/jawahar/zephyrproject/zephyr/scripts/build/gen_kobject_list.py
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build
+-- west build: building application
+[1/142] Preparing syscall dependency handling
+
+[3/142] Generating include/generated/zephyr/version.h
+-- Zephyr version: 4.2.00-rc1 (/home/jawahar/zephyrproject/zephyr), build: v4.2.0-rc1-26-gb15404f99834
+[142/142] Linking C executable zephyr/zephyr.elf
+Memory region         Used Size  Region Size  %age Used
+           FLASH:       16516 B       512 KB      3.15%
+             RAM:        4544 B       128 KB      3.47%
+     BACKUP_SRAM:          0 GB         4 KB      0.00%
+        IDT_LIST:          0 GB        32 KB      0.00%
+Generating files from /home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build/zephyr/zephyr.elf for board: nucleo_f446re
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ lsusb | grep ST
+Bus 002 Device 083: ID 0483:374b STMicroelectronics ST-LINK/V2.1
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ west flash
+-- west flash: rebuilding
+ninja: no work to do.
+-- west flash: using runner stm32cubeprogrammer
+FATAL ERROR: required program /home/jawahar/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI not found; install it or add its location to PATH
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ cd ~/zephyrproject/zephyr/samples/basic/blinky
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ west flash
+-- west flash: rebuilding
+ninja: no work to do.
+-- west flash: using runner stm32cubeprogrammer
+FATAL ERROR: required program /home/jawahar/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI not found; install it or add its location to PATH
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ mkdir -p /home/jawahar/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ ln -s /opt/st/stm32cubeide_1.11.0/plugins/com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.linux64_2.0.500.202209151145/tools/bin/STM32_Programmer_CLI /home/jawahar/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ west flash
+-- west flash: rebuilding
+ninja: no work to do.
+-- west flash: using runner stm32cubeprogrammer
+      -------------------------------------------------------------------
+                        STM32CubeProgrammer v2.12.0                  
+      -------------------------------------------------------------------
+
+ST-LINK SN  : 0668FF30304B4E3043026036
+ST-LINK FW  : V2J43M28
+Board       : NUCLEO-F446RE
+Voltage     : 3.26V
+SWD freq    : 4000 KHz
+Connect mode: Under Reset
+Reset mode  : Hardware reset
+Device ID   : 0x421
+Revision ID : Rev A
+Device name : STM32F446xx
+Flash size  : 512 KBytes
+Device type : MCU
+Device CPU  : Cortex-M4
+BL Version  : 0x90
+
+
+
+Memory Programming ...
+Opening and parsing file: zephyr.hex
+  File          : zephyr.hex
+  Size          : 16.13 KB 
+  Address       : 0x08000000 
+
+
+Erasing memory corresponding to segment 0:
+Erasing internal memory sectors [0 1]
+Download in Progress:
+[==================================================] 100% 
+
+File download complete
+Time elapsed during download operation: 00:00:00.710
+
+RUNNING Program ... 
+  Address:      : 0x8000000
+Application is running, Please Hold on...
+Start operation achieved successfully
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ cd ~/zephyrproject/zephyr/samples/basic/blinky
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ west build -b nucleo_f446re . -p
+-- west build: making build dir /home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build pristine
+-- west build: generating a build system
+Loading Zephyr default modules (Zephyr base).
+-- Application: /home/jawahar/zephyrproject/zephyr/samples/basic/blinky
+-- CMake version: 3.20.0
+-- Found Python3: /home/jawahar/zephyr-env/bin/python3.12 (found suitable version "3.12.11", minimum required is "3.12.1") found components: Interpreter 
+-- Cache files will be written to: /home/jawahar/.cache/zephyr
+-- Zephyr version: 4.2.00-rc1 (/home/jawahar/zephyrproject/zephyr)
+-- Found west (found suitable version "1.4.0", minimum required is "0.14.0")
+-- Board: nucleo_f446re, qualifiers: stm32f446xx
+-- ZEPHYR_TOOLCHAIN_VARIANT not set, trying to locate Zephyr SDK
+-- Found host-tools: zephyr 0.16.5 (/opt/zephyr-sdk)
+-- Found toolchain: zephyr 0.16.5 (/opt/zephyr-sdk)
+-- Found Dtc: /opt/zephyr-sdk/sysroots/x86_64-pokysdk-linux/usr/bin/dtc (found suitable version "1.6.0", minimum required is "1.4.6") 
+-- Found BOARD.dts: /home/jawahar/zephyrproject/zephyr/boards/st/nucleo_f446re/nucleo_f446re.dts
+-- Generated zephyr.dts: /home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build/zephyr/zephyr.dts
+-- Generated pickled edt: /home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build/zephyr/edt.pickle
+-- Generated devicetree_generated.h: /home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build/zephyr/include/generated/zephyr/devicetree_generated.h
+Parsing /home/jawahar/zephyrproject/zephyr/Kconfig
+Loaded configuration '/home/jawahar/zephyrproject/zephyr/boards/st/nucleo_f446re/nucleo_f446re_defconfig'
+Merged configuration '/home/jawahar/zephyrproject/zephyr/samples/basic/blinky/prj.conf'
+Configuration saved to '/home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build/zephyr/.config'
+Kconfig header saved to '/home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build/zephyr/include/generated/zephyr/autoconf.h'
+-- Found GnuLd: /opt/zephyr-sdk/arm-zephyr-eabi/arm-zephyr-eabi/bin/ld.bfd (found version "2.38") 
+-- The C compiler identification is GNU 12.2.0
+-- The CXX compiler identification is GNU 12.2.0
+-- The ASM compiler identification is GNU
+-- Found assembler: /opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc
+-- Using ccache: /usr/bin/ccache
+-- Found gen_kobject_list: /home/jawahar/zephyrproject/zephyr/scripts/build/gen_kobject_list.py
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build
+-- west build: building application
+[1/142] Preparing syscall dependency handling
+
+[3/142] Generating include/generated/zephyr/version.h
+-- Zephyr version: 4.2.00-rc1 (/home/jawahar/zephyrproject/zephyr), build: v4.2.0-rc1-26-gb15404f99834
+[142/142] Linking C executable zephyr/zephyr.elf
+Memory region         Used Size  Region Size  %age Used
+           FLASH:       16516 B       512 KB      3.15%
+             RAM:        4544 B       128 KB      3.47%
+     BACKUP_SRAM:          0 GB         4 KB      0.00%
+        IDT_LIST:          0 GB        32 KB      0.00%
+Generating files from /home/jawahar/zephyrproject/zephyr/samples/basic/blinky/build/zephyr/zephyr.elf for board: nucleo_f446re
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ west flash
+-- west flash: rebuilding
+ninja: no work to do.
+-- west flash: using runner stm32cubeprogrammer
+      -------------------------------------------------------------------
+                        STM32CubeProgrammer v2.12.0                  
+      -------------------------------------------------------------------
+
+ST-LINK SN  : 0668FF30304B4E3043026036
+ST-LINK FW  : V2J43M28
+Board       : NUCLEO-F446RE
+Voltage     : 3.26V
+SWD freq    : 4000 KHz
+Connect mode: Under Reset
+Reset mode  : Hardware reset
+Device ID   : 0x421
+Revision ID : Rev A
+Device name : STM32F446xx
+Flash size  : 512 KBytes
+Device type : MCU
+Device CPU  : Cortex-M4
+BL Version  : 0x90
+
+
+
+Memory Programming ...
+Opening and parsing file: zephyr.hex
+  File          : zephyr.hex
+  Size          : 16.13 KB 
+  Address       : 0x08000000 
+
+
+Erasing memory corresponding to segment 0:
+Erasing internal memory sectors [0 1]
+Download in Progress:
+[==================================================] 100% 
+
+File download complete
+Time elapsed during download operation: 00:00:00.706
+
+RUNNING Program ... 
+  Address:      : 0x8000000
+Application is running, Please Hold on...
+Start operation achieved successfully
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ ls
+build  CMakeLists.txt  prj.conf  README.rst  sample.yaml  src
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ cd src/
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky/src$ ls
+main.c
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky/src$ vim main.c 
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky/src$ gcc main.c 
+main.c:8:10: fatal error: zephyr/kernel.h: No such file or directory
+    8 | #include <zephyr/kernel.h>
+      |          ^~~~~~~~~~~~~~~~~
+compilation terminated.
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky/src$ vim main.c 
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky/src$ cd ..
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky$ cd ..
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic$ cd ..
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples$ cd ..
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr$ l
+arch/               CONTRIBUTING.rst  Kconfig.constants  misc/        share/         VERSION
+boards/             doc/              Kconfig.zephyr     modules/     snippets/      version.h.in
+cmake/              drivers/          kernel/            README.rst   soc/           west.yml
+CMakeLists.txt      dts/              lib/               samples/     submanifests/  zephyr-env.cmd
+CODE_OF_CONDUCT.md  include/          LICENSE            scripts/     subsys/        zephyr-env.sh
+CODEOWNERS          Kconfig           MAINTAINERS.yml    SDK_VERSION  tests/
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr$ cd ..
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject$ ls
+bootloader  modules  tools  zephyr
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject$ cd zephyr/samples/basic/blinky/src/
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky/src$ ls
+main.c
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky/src$ vim main.c 
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky/src$ mkdir -p ~/zephyrproject/myapps/my_blinky_app/src
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/zephyr/samples/basic/blinky/src$ cd ~/zephyrproject/myapps/my_blinky_app
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ ls
+src
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ cd src/
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app/src$ ls
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app/src$ vim main.c
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app/src$ cd ..
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ ls
+src
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ vim CMakeLists.txt
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ vim prj.conf
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ west build -b nucleo_f446re . -p
+-- west build: generating a build system
+Loading Zephyr default modules (Zephyr base).
+-- Application: /home/jawahar/zephyrproject/myapps/my_blinky_app
+-- CMake version: 3.20.0
+-- Found Python3: /home/jawahar/zephyr-env/bin/python3.12 (found suitable version "3.12.11", minimum required is "3.12.1") found components: Interpreter 
+-- Cache files will be written to: /home/jawahar/.cache/zephyr
+-- Zephyr version: 4.2.00-rc1 (/home/jawahar/zephyrproject/zephyr)
+-- Found west (found suitable version "1.4.0", minimum required is "0.14.0")
+-- Board: nucleo_f446re, qualifiers: stm32f446xx
+-- ZEPHYR_TOOLCHAIN_VARIANT not set, trying to locate Zephyr SDK
+-- Found host-tools: zephyr 0.16.5 (/opt/zephyr-sdk)
+-- Found toolchain: zephyr 0.16.5 (/opt/zephyr-sdk)
+-- Found Dtc: /opt/zephyr-sdk/sysroots/x86_64-pokysdk-linux/usr/bin/dtc (found suitable version "1.6.0", minimum required is "1.4.6") 
+-- Found BOARD.dts: /home/jawahar/zephyrproject/zephyr/boards/st/nucleo_f446re/nucleo_f446re.dts
+-- Generated zephyr.dts: /home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/zephyr.dts
+-- Generated pickled edt: /home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/edt.pickle
+-- Generated devicetree_generated.h: /home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/include/generated/zephyr/devicetree_generated.h
+Parsing /home/jawahar/zephyrproject/zephyr/Kconfig
+Loaded configuration '/home/jawahar/zephyrproject/zephyr/boards/st/nucleo_f446re/nucleo_f446re_defconfig'
+Merged configuration '/home/jawahar/zephyrproject/myapps/my_blinky_app/prj.conf'
+Configuration saved to '/home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/.config'
+Kconfig header saved to '/home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/include/generated/zephyr/autoconf.h'
+-- Found GnuLd: /opt/zephyr-sdk/arm-zephyr-eabi/arm-zephyr-eabi/bin/ld.bfd (found version "2.38") 
+-- The C compiler identification is GNU 12.2.0
+-- The CXX compiler identification is GNU 12.2.0
+-- The ASM compiler identification is GNU
+-- Found assembler: /opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc
+-- Using ccache: /usr/bin/ccache
+-- Found gen_kobject_list: /home/jawahar/zephyrproject/zephyr/scripts/build/gen_kobject_list.py
+-- Configuring done
+CMake Error at /home/jawahar/zephyrproject/zephyr/cmake/modules/extensions.cmake:462 (add_library):
+  No SOURCES given to target: app
+Call Stack (most recent call first):
+  /home/jawahar/zephyrproject/zephyr/cmake/modules/kernel.cmake:224 (zephyr_library_named)
+  /home/jawahar/zephyrproject/zephyr/cmake/modules/zephyr_default.cmake:140 (include)
+  /home/jawahar/zephyrproject/zephyr/share/zephyr-package/cmake/ZephyrConfig.cmake:66 (include)
+  /home/jawahar/zephyrproject/zephyr/share/zephyr-package/cmake/ZephyrConfig.cmake:92 (include_boilerplate)
+  CMakeLists.txt:2 (find_package)
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.
+FATAL ERROR: command exited with status 1: /opt/cmake/bin/cmake -DWEST_PYTHON=/home/jawahar/zephyr-env/bin/python3.12 -B/home/jawahar/zephyrproject/myapps/my_blinky_app/build -GNinja -DBOARD=nucleo_f446re -S/home/jawahar/zephyrproject/myapps/my_blinky_app
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ mv src/main.c .
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ ls
+build  CMakeLists.txt  main.c  prj.conf  src
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ rmdir src
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ west build -b nucleo_f446re . -p
+-- west build: making build dir /home/jawahar/zephyrproject/myapps/my_blinky_app/build pristine
+-- west build: generating a build system
+Loading Zephyr default modules (Zephyr base).
+-- Application: /home/jawahar/zephyrproject/myapps/my_blinky_app
+-- CMake version: 3.20.0
+-- Found Python3: /home/jawahar/zephyr-env/bin/python3.12 (found suitable version "3.12.11", minimum required is "3.12.1") found components: Interpreter 
+-- Cache files will be written to: /home/jawahar/.cache/zephyr
+-- Zephyr version: 4.2.00-rc1 (/home/jawahar/zephyrproject/zephyr)
+-- Found west (found suitable version "1.4.0", minimum required is "0.14.0")
+-- Board: nucleo_f446re, qualifiers: stm32f446xx
+-- ZEPHYR_TOOLCHAIN_VARIANT not set, trying to locate Zephyr SDK
+-- Found host-tools: zephyr 0.16.5 (/opt/zephyr-sdk)
+-- Found toolchain: zephyr 0.16.5 (/opt/zephyr-sdk)
+-- Found Dtc: /opt/zephyr-sdk/sysroots/x86_64-pokysdk-linux/usr/bin/dtc (found suitable version "1.6.0", minimum required is "1.4.6") 
+-- Found BOARD.dts: /home/jawahar/zephyrproject/zephyr/boards/st/nucleo_f446re/nucleo_f446re.dts
+-- Generated zephyr.dts: /home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/zephyr.dts
+-- Generated pickled edt: /home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/edt.pickle
+-- Generated devicetree_generated.h: /home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/include/generated/zephyr/devicetree_generated.h
+Parsing /home/jawahar/zephyrproject/zephyr/Kconfig
+Loaded configuration '/home/jawahar/zephyrproject/zephyr/boards/st/nucleo_f446re/nucleo_f446re_defconfig'
+Merged configuration '/home/jawahar/zephyrproject/myapps/my_blinky_app/prj.conf'
+Configuration saved to '/home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/.config'
+Kconfig header saved to '/home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/include/generated/zephyr/autoconf.h'
+-- Found GnuLd: /opt/zephyr-sdk/arm-zephyr-eabi/arm-zephyr-eabi/bin/ld.bfd (found version "2.38") 
+-- The C compiler identification is GNU 12.2.0
+-- The CXX compiler identification is GNU 12.2.0
+-- The ASM compiler identification is GNU
+-- Found assembler: /opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc
+-- Using ccache: /usr/bin/ccache
+-- Found gen_kobject_list: /home/jawahar/zephyrproject/zephyr/scripts/build/gen_kobject_list.py
+-- Configuring done
+CMake Error at /home/jawahar/zephyrproject/zephyr/cmake/modules/extensions.cmake:462 (add_library):
+  No SOURCES given to target: app
+Call Stack (most recent call first):
+  /home/jawahar/zephyrproject/zephyr/cmake/modules/kernel.cmake:224 (zephyr_library_named)
+  /home/jawahar/zephyrproject/zephyr/cmake/modules/zephyr_default.cmake:140 (include)
+  /home/jawahar/zephyrproject/zephyr/share/zephyr-package/cmake/ZephyrConfig.cmake:66 (include)
+  /home/jawahar/zephyrproject/zephyr/share/zephyr-package/cmake/ZephyrConfig.cmake:92 (include_boilerplate)
+  CMakeLists.txt:2 (find_package)
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.
+FATAL ERROR: command exited with status 1: /opt/cmake/bin/cmake -DWEST_PYTHON=/home/jawahar/zephyr-env/bin/python3.12 -B/home/jawahar/zephyrproject/myapps/my_blinky_app/build -GNinja -DBOARD=nucleo_f446re -S/home/jawahar/zephyrproject/myapps/my_blinky_app
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ ls
+build  CMakeLists.txt  main.c  prj.conf
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ mkdir src
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ cd src/
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app/src$ ls
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app/src$ vim main.c 
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app/src$ cd ..
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ ls
+build  CMakeLists.txt  main.c  prj.conf  src
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ west build -b nucleo_f446re . -p
+-- west build: making build dir /home/jawahar/zephyrproject/myapps/my_blinky_app/build pristine
+-- west build: generating a build system
+Loading Zephyr default modules (Zephyr base).
+-- Application: /home/jawahar/zephyrproject/myapps/my_blinky_app
+-- CMake version: 3.20.0
+-- Found Python3: /home/jawahar/zephyr-env/bin/python3.12 (found suitable version "3.12.11", minimum required is "3.12.1") found components: Interpreter 
+-- Cache files will be written to: /home/jawahar/.cache/zephyr
+-- Zephyr version: 4.2.00-rc1 (/home/jawahar/zephyrproject/zephyr)
+-- Found west (found suitable version "1.4.0", minimum required is "0.14.0")
+-- Board: nucleo_f446re, qualifiers: stm32f446xx
+-- ZEPHYR_TOOLCHAIN_VARIANT not set, trying to locate Zephyr SDK
+-- Found host-tools: zephyr 0.16.5 (/opt/zephyr-sdk)
+-- Found toolchain: zephyr 0.16.5 (/opt/zephyr-sdk)
+-- Found Dtc: /opt/zephyr-sdk/sysroots/x86_64-pokysdk-linux/usr/bin/dtc (found suitable version "1.6.0", minimum required is "1.4.6") 
+-- Found BOARD.dts: /home/jawahar/zephyrproject/zephyr/boards/st/nucleo_f446re/nucleo_f446re.dts
+-- Generated zephyr.dts: /home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/zephyr.dts
+-- Generated pickled edt: /home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/edt.pickle
+-- Generated devicetree_generated.h: /home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/include/generated/zephyr/devicetree_generated.h
+Parsing /home/jawahar/zephyrproject/zephyr/Kconfig
+Loaded configuration '/home/jawahar/zephyrproject/zephyr/boards/st/nucleo_f446re/nucleo_f446re_defconfig'
+Merged configuration '/home/jawahar/zephyrproject/myapps/my_blinky_app/prj.conf'
+Configuration saved to '/home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/.config'
+Kconfig header saved to '/home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/include/generated/zephyr/autoconf.h'
+-- Found GnuLd: /opt/zephyr-sdk/arm-zephyr-eabi/arm-zephyr-eabi/bin/ld.bfd (found version "2.38") 
+-- The C compiler identification is GNU 12.2.0
+-- The CXX compiler identification is GNU 12.2.0
+-- The ASM compiler identification is GNU
+-- Found assembler: /opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc
+-- Using ccache: /usr/bin/ccache
+-- Found gen_kobject_list: /home/jawahar/zephyrproject/zephyr/scripts/build/gen_kobject_list.py
+-- Configuring done
+CMake Error at /home/jawahar/zephyrproject/zephyr/cmake/modules/extensions.cmake:462 (add_library):
+  No SOURCES given to target: app
+Call Stack (most recent call first):
+  /home/jawahar/zephyrproject/zephyr/cmake/modules/kernel.cmake:224 (zephyr_library_named)
+  /home/jawahar/zephyrproject/zephyr/cmake/modules/zephyr_default.cmake:140 (include)
+  /home/jawahar/zephyrproject/zephyr/share/zephyr-package/cmake/ZephyrConfig.cmake:66 (include)
+  /home/jawahar/zephyrproject/zephyr/share/zephyr-package/cmake/ZephyrConfig.cmake:92 (include_boilerplate)
+  CMakeLists.txt:2 (find_package)
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.
+FATAL ERROR: command exited with status 1: /opt/cmake/bin/cmake -DWEST_PYTHON=/home/jawahar/zephyr-env/bin/python3.12 -B/home/jawahar/zephyrproject/myapps/my_blinky_app/build -GNinja -DBOARD=nucleo_f446re -S/home/jawahar/zephyrproject/myapps/my_blinky_app
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ ls
+build  CMakeLists.txt  main.c  prj.conf  src
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ cd src/
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app/src$ ls
+main.c
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app/src$ vim ~/zephyrproject/myapps/my_blinky_app/CMakeLists.txt
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app/src$ rm -rf build
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app/src$ west build -b nucleo_f446re . -p
+ERROR: . doesn't contain a CMakeLists.txt
+FATAL ERROR: refusing to proceed without --force due to above error
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app/src$ cd ..
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ ls
+build  CMakeLists.txt  main.c  prj.conf  src
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ 
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ 
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ 
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ rm -rf build
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ west build -b nucleo_f446re . -p
+-- west build: generating a build system
+Loading Zephyr default modules (Zephyr base).
+-- Application: /home/jawahar/zephyrproject/myapps/my_blinky_app
+-- CMake version: 3.20.0
+-- Found Python3: /home/jawahar/zephyr-env/bin/python3.12 (found suitable version "3.12.11", minimum required is "3.12.1") found components: Interpreter 
+-- Cache files will be written to: /home/jawahar/.cache/zephyr
+-- Zephyr version: 4.2.00-rc1 (/home/jawahar/zephyrproject/zephyr)
+-- Found west (found suitable version "1.4.0", minimum required is "0.14.0")
+-- Board: nucleo_f446re, qualifiers: stm32f446xx
+-- ZEPHYR_TOOLCHAIN_VARIANT not set, trying to locate Zephyr SDK
+-- Found host-tools: zephyr 0.16.5 (/opt/zephyr-sdk)
+-- Found toolchain: zephyr 0.16.5 (/opt/zephyr-sdk)
+-- Found Dtc: /opt/zephyr-sdk/sysroots/x86_64-pokysdk-linux/usr/bin/dtc (found suitable version "1.6.0", minimum required is "1.4.6") 
+-- Found BOARD.dts: /home/jawahar/zephyrproject/zephyr/boards/st/nucleo_f446re/nucleo_f446re.dts
+-- Generated zephyr.dts: /home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/zephyr.dts
+-- Generated pickled edt: /home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/edt.pickle
+-- Generated devicetree_generated.h: /home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/include/generated/zephyr/devicetree_generated.h
+Parsing /home/jawahar/zephyrproject/zephyr/Kconfig
+Loaded configuration '/home/jawahar/zephyrproject/zephyr/boards/st/nucleo_f446re/nucleo_f446re_defconfig'
+Merged configuration '/home/jawahar/zephyrproject/myapps/my_blinky_app/prj.conf'
+Configuration saved to '/home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/.config'
+Kconfig header saved to '/home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/include/generated/zephyr/autoconf.h'
+-- Found GnuLd: /opt/zephyr-sdk/arm-zephyr-eabi/arm-zephyr-eabi/bin/ld.bfd (found version "2.38") 
+-- The C compiler identification is GNU 12.2.0
+-- The CXX compiler identification is GNU 12.2.0
+-- The ASM compiler identification is GNU
+-- Found assembler: /opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc
+-- Using ccache: /usr/bin/ccache
+-- Found gen_kobject_list: /home/jawahar/zephyrproject/zephyr/scripts/build/gen_kobject_list.py
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/jawahar/zephyrproject/myapps/my_blinky_app/build
+-- west build: building application
+[1/142] Preparing syscall dependency handling
+
+[2/142] Generating include/generated/zephyr/version.h
+-- Zephyr version: 4.2.00-rc1 (/home/jawahar/zephyrproject/zephyr), build: v4.2.0-rc1-26-gb15404f99834
+[13/142] Building C object CMakeFiles/app.dir/src/main.c.obj
+../src/main.c:7:6: warning: return type of 'main' is not 'int' [-Wmain]
+    7 | void main(void) {
+      |      ^~~~
+[142/142] Linking C executable zephyr/zephyr.elf
+Memory region         Used Size  Region Size  %age Used
+           FLASH:       16392 B       512 KB      3.13%
+             RAM:        4544 B       128 KB      3.47%
+     BACKUP_SRAM:          0 GB         4 KB      0.00%
+        IDT_LIST:          0 GB        32 KB      0.00%
+Generating files from /home/jawahar/zephyrproject/myapps/my_blinky_app/build/zephyr/zephyr.elf for board: nucleo_f446re
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ 
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ 
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ west flash
+-- west flash: rebuilding
+ninja: no work to do.
+-- west flash: using runner stm32cubeprogrammer
+      -------------------------------------------------------------------
+                        STM32CubeProgrammer v2.12.0                  
+      -------------------------------------------------------------------
+
+ST-LINK SN  : 0668FF30304B4E3043026036
+ST-LINK FW  : V2J43M28
+Board       : NUCLEO-F446RE
+Voltage     : 3.26V
+SWD freq    : 4000 KHz
+Connect mode: Under Reset
+Reset mode  : Hardware reset
+Device ID   : 0x421
+Revision ID : Rev A
+Device name : STM32F446xx
+Flash size  : 512 KBytes
+Device type : MCU
+Device CPU  : Cortex-M4
+BL Version  : 0x90
+
+
+
+Memory Programming ...
+Opening and parsing file: zephyr.hex
+  File          : zephyr.hex
+  Size          : 16.01 KB 
+  Address       : 0x08000000 
+
+
+Erasing memory corresponding to segment 0:
+Erasing internal memory sectors [0 1]
+Download in Progress:
+[==================================================] 100% 
+
+File download complete
+Time elapsed during download operation: 00:00:00.704
+
+RUNNING Program ... 
+  Address:      : 0x8000000
+Application is running, Please Hold on...
+Start operation achieved successfully
+((zephyr-env) ) jawahar@jawahar:~/zephyrproject/myapps/my_blinky_app$ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
